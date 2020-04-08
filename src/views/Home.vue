@@ -4,7 +4,7 @@
       <v-progress-circular indeterminate size="64"></v-progress-circular>
     </v-overlay>
 
-    <CountriesTotal :countriesTotal="countriesTotal"> </CountriesTotal>
+    <CountriesTotal :countriesTotal="countriesTotal"></CountriesTotal>
 
     <CountriesTable
       :countries="countries"
@@ -14,65 +14,60 @@
 </template>
 
 <script>
-import orderBy from "lodash/orderBy";
-import filter from "lodash/filter";
-import CountriesTable from "../components/CountriesTable";
-import CountriesTotal from "../components/CountriesTotal";
+  import orderBy from 'lodash/orderBy'
+  import filter from 'lodash/filter'
+  import CountriesTable from '../components/CountriesTable'
+  import CountriesTotal from '../components/CountriesTotal'
 
-export default {
-  name: "Home",
-  components: {
-    CountriesTable,
-    CountriesTotal,
-  },
-  data: () => ({
-    loading: false,
-    countriesTotal: {},
-    countries: {},
-    countriesYesterday: {},
-  }),
-  methods: {
-    fetchData() {
-      this.loading = true;
-
-      this.axios
-        .get("https://corona.lmao.ninja/all")
-        .then((response) => {
-          this.countriesTotal = response.data;
-          this.$store.dispatch("countries/storeCountriesTotal", response.data);
-        })
-        .catch((error) => {
-          console.log(error);
-        });
-
-      this.axios
-        .get("https://corona.lmao.ninja/yesterday")
-        .then((response) => {
-          this.countriesYesterday = response.data;
-        })
-        .catch((error) => {
-          console.log(error);
-        });
-
-      this.axios
-        .get("https://corona.lmao.ninja/countries")
-        .then((response) => {
-          var responseData = filter(response.data, function(data) {
-            return data && data.country && data.cases > 0;
-          });
-
-          this.countries = orderBy(responseData, ["cases"], ["desc"]);
-          this.loading = false;
-        })
-        .catch((error) => {
-          console.log(error);
-        });
+  export default {
+    name: 'Home',
+    components: {
+      CountriesTable,
+      CountriesTotal,
     },
-  },
-  created: function() {
-    this.fetchData();
-  },
-};
+    data: () => ({
+      loading: false,
+      countriesTotal: {},
+      countries: {},
+      countriesYesterday: {},
+    }),
+    methods: {
+      fetchData () {
+        this.loading = true
+
+        this.axios.get('https://corona.lmao.ninja/all').then((response) => {
+          this.countriesTotal = response.data
+          this.$store.dispatch('countries/storeCountriesTotal', response.data)
+        }).catch((error) => {
+          console.log(error)
+        })
+
+        this.axios.get('https://corona.lmao.ninja/yesterday').
+          then((response) => {
+            this.countriesYesterday = response.data
+          }).
+          catch((error) => {
+            console.log(error)
+          })
+
+        this.axios.get('https://corona.lmao.ninja/countries').
+          then((response) => {
+            var responseData = filter(response.data, function (data) {
+              return data && data.country && data.cases > 0
+            })
+
+            this.countries = orderBy(responseData, ['cases'], ['desc'])
+            this.loading = false
+          }).
+          catch((error) => {
+            console.log(error)
+          })
+      },
+    },
+    created: function () {
+      this.fetchData()
+    },
+  }
 </script>
 
 <style scoped></style>

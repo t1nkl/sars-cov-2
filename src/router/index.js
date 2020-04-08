@@ -1,40 +1,40 @@
-import Vue from "vue";
-import VueRouter from "vue-router";
-import Index from "../layouts/Index.vue";
+import Vue from 'vue'
+import VueRouter from 'vue-router'
+import Index from '../layouts/Index.vue'
 
-Vue.use(VueRouter);
+Vue.use(VueRouter)
 
 const routes = [
   {
-    path: "/",
+    path: '/',
     component: Index,
     children: [
       {
-        path: "/",
-        name: "home",
+        path: '/',
+        name: 'home',
         component: () =>
-          import(/* webpackChunkName: "home" */ "../views/Home.vue"),
+          import(/* webpackChunkName: "home" */ '../views/Home.vue'),
         meta: {
-          title: "Home",
+          title: 'Home',
         },
       },
       {
-        path: "/details",
-        name: "details",
+        path: '/details',
+        name: 'details',
         component: () =>
-          import(/* webpackChunkName: "details" */ "../views/Details.vue"),
+          import(/* webpackChunkName: "details" */ '../views/Details.vue'),
         meta: {
-          title: "Details",
+          title: 'Details',
         },
       },
     ],
   },
-];
+]
 
 const router = new VueRouter({
-  mode: "history",
+  mode: 'history',
   base: process.env.BASE_URL,
   routes,
-});
+})
 
-export default router;
+export default router

@@ -19,19 +19,19 @@
 </template>
 
 <script>
-import headerLayout from "./Header";
-import footerLayout from "./Footer";
+  import headerLayout from './Header'
+  import footerLayout from './Footer'
 
-export default {
-  name: "Elementor",
-  components: {
-    "header-layout": headerLayout,
-    "footer-layout": footerLayout,
-  },
-  data: () => ({
-    //
-  }),
-};
+  export default {
+    name: 'Elementor',
+    components: {
+      'header-layout': headerLayout,
+      'footer-layout': footerLayout,
+    },
+    data: () => ({
+      //
+    }),
+  }
 </script>
 
 <style lang="scss" scoped></style>
