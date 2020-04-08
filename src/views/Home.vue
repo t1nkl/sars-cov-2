@@ -1,14 +1,18 @@
 <template>
   <div class="home">
+    <CountriesTotal
+      :countriesTotal="countriesTotal"
+      v-if="!loading"
+    ></CountriesTotal>
+
     <v-overlay :value="loading">
       <v-progress-circular indeterminate size="64"></v-progress-circular>
     </v-overlay>
 
-    <CountriesTotal :countriesTotal="countriesTotal"></CountriesTotal>
-
     <CountriesTable
       :countries="countries"
       :countriesYesterday="countriesYesterday"
+      :loading="loading"
     ></CountriesTable>
   </div>
 </template>

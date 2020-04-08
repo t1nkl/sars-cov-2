@@ -5,6 +5,7 @@
       :headers="headers"
       :items="countries"
       :items-per-page="250"
+      :loading="loading"
       :single-expand="true"
       @item-expanded="toggleExpanded($event)"
       class="elevation-1"
@@ -17,15 +18,16 @@
     >
       <template v-slot:item.country="{ item }">
         <v-row align="center" justify="center">
-          <v-avatar size="20">
-            <v-img
-              :alt="item.country"
-              :src="item.countryInfo.flag"
-              lazy-src="../assets/image/lazy.jpeg"
-              v-if="item.countryInfo.flag"
-            ></v-img>
-            <v-icon dark v-else>mdi-alert-circle-outline</v-icon>
-          </v-avatar>
+          <!--          TODO: Optimize -->
+          <!--          <v-avatar size="20">-->
+          <!--            <v-img-->
+          <!--              :alt="item.country"-->
+          <!--              :src="item.countryInfo.flag"-->
+          <!--              lazy-src="../assets/image/lazy.jpeg"-->
+          <!--              v-if="item.countryInfo.flag"-->
+          <!--            ></v-img>-->
+          <!--            <v-icon dark v-else>mdi-alert-circle-outline</v-icon>-->
+          <!--          </v-avatar>-->
           <div class="mx-2"></div>
           <strong class="title">{{ item.country }}</strong>
         </v-row>
@@ -55,11 +57,12 @@
           small
           text-color="black"
           v-if="
-            (item.todayRecovered =
-              item.recovered -
-              countriesYesterday.find(
-                (element) => element.country == item.country
-              ).recovered) > 0
+            countriesYesterday &&
+              (item.todayRecovered =
+                item.recovered -
+                countriesYesterday.find(
+                  (element) => element.country == item.country
+                ).recovered) > 0
           "
         >
           + {{ item.todayRecovered }}
@@ -81,7 +84,7 @@
 
       <template v-slot:expanded-item="{ headers, item }">
         <td :colspan="headers.length">
-          <v-container fluid>
+          <v-container fluid v-if="!loadingSparkline">
             <v-sparkline
               :auto-line-width="false"
               :fill="false"
@@ -93,7 +96,7 @@
               :smooth="10"
               :stroke-linecap="'round'"
               :type="'trend'"
-              :value="getTimelineCases()"
+              :value="timeline"
               auto-draw
             ></v-sparkline>
           </v-container>
@@ -107,6 +110,10 @@
   export default {
     name: 'CountriesTable',
     props: {
+      loading: {
+        type: Boolean,
+        required: true,
+      },
       countries: {
         type: Array,
         required: true,
@@ -179,6 +186,7 @@
           class: 'text-center text-uppercase',
         },
       ],
+      loadingSparkline: false,
       expandedCountry: {
         country: '',
         provinces: [],
@@ -190,27 +198,42 @@
       },
     }),
     methods: {
-      toggleExpanded (event) {
+      async toggleExpanded (event) {
         if (this.expandedCountry.country === event.item.country) {
+          this.loadingSparkline = false
+
           return
         }
 
-        this.axios.get(
+        this.loadingSparkline = true
+
+        await this.axios.get(
           'https://corona.lmao.ninja/v2/historical/' +
           event.item.country +
           '?lastdays=30',
         ).then((response) => {
           this.expandedCountry = response.data
+          this.loadingSparkline = false
         }).catch((error) => {
           console.log(error)
         })
       },
-      getTimelineCases () {
-        return Object.values(this.expandedCountry.timeline.cases)
-      },
     },
     mounted: function () {
       //
+    },
+    computed: {
+      timeline () {
+        const cases = Object.values(this.expandedCountry.timeline.cases)
+        const recovered = Object.values(
+          this.expandedCountry.timeline.recovered)
+        const result = []
+
+        for (var i = 0; i <= cases.length - 1; i++)
+          result.push(cases[i] - recovered[i])
+
+        return result
+      },
     },
   }
 </script>
