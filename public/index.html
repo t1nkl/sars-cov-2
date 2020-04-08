@@ -34,6 +34,21 @@
       >
     </noscript>
     <div id="app"></div>
-    <!-- built files will be auto injected -->
+    <script src="https://www.gstatic.com/firebasejs/7.13.2/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.13.2/firebase-analytics.js"></script>
+    <script>
+      var firebaseConfig = {
+        apiKey: "AIzaSyCrVK53_FFniEB5JIk1xEO_B5g2l5b_fhs",
+        authDomain: "my-projects-6fe1a.firebaseapp.com",
+        databaseURL: "https://my-projects-6fe1a.firebaseio.com",
+        projectId: "my-projects-6fe1a",
+        storageBucket: "my-projects-6fe1a.appspot.com",
+        messagingSenderId: "1077364480846",
+        appId: "1:1077364480846:web:f4ae788819a21296c3dc1f",
+        measurementId: "G-P7V6G2QC6H",
+      };
+      firebase.initializeApp(firebaseConfig);
+      firebase.analytics();
+    </script>
   </body>
 </html>

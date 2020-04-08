@@ -6,7 +6,7 @@ import "./plugins";
 import vuetify from "./plugins/vuetify";
 
 Vue.config.productionTip = false;
-Vue.config.silent = true;
+Vue.config.silent = process.env.NODE_ENV !== "production";
 
 new Vue({
   router,

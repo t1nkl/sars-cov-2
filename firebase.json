@@ -1,6 +1,7 @@
 {
   "hosting": {
     "public": "dist",
+    "site": "sars-cov-2-app",
     "ignore": [
       "firebase.json",
       "**/.*",

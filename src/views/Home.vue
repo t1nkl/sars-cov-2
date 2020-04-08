@@ -3,56 +3,33 @@
     <v-overlay :value="loading">
       <v-progress-circular indeterminate size="64"></v-progress-circular>
     </v-overlay>
-    <v-simple-table
-      dark
-      fixed-header
-      height="800px"
-      v-if="countriesTotal && Object.keys(countries).length > 1"
-    >
-      <template v-slot:default>
-        <thead>
-          <tr>
-            <th class="text-center text-uppercase">Country</th>
-            <th class="text-center text-uppercase">Cases</th>
-            <th class="text-center text-uppercase">Active</th>
-            <th class="text-center text-uppercase">Recovered</th>
-            <th class="text-center text-uppercase">Critical</th>
-            <th class="text-center text-uppercase">Deaths</th>
-            <th class="text-center text-uppercase">Cases per<br />Million</th>
-            <th class="text-center text-uppercase">Deaths per<br />Million</th>
-            <th class="text-center text-uppercase">Tests per<br />Million</th>
-            <th class="text-center text-uppercase">Total<br />Tests</th>
-          </tr>
-        </thead>
-        <tbody>
-          <CountriesTotal :countriesTotal="countriesTotal"></CountriesTotal>
-          <Country
-            v-for="country in countries"
-            :key="country.countryInfo._id"
-            :country="country"
-          ></Country>
-        </tbody>
-      </template>
-    </v-simple-table>
+
+    <CountriesTotal :countriesTotal="countriesTotal"> </CountriesTotal>
+
+    <CountriesTable
+      :countries="countries"
+      :countriesYesterday="countriesYesterday"
+    ></CountriesTable>
   </div>
 </template>
 
 <script>
 import orderBy from "lodash/orderBy";
 import filter from "lodash/filter";
+import CountriesTable from "../components/CountriesTable";
 import CountriesTotal from "../components/CountriesTotal";
-import Country from "../components/Country";
 
 export default {
   name: "Home",
   components: {
+    CountriesTable,
     CountriesTotal,
-    Country,
   },
   data: () => ({
     loading: false,
     countriesTotal: {},
     countries: {},
+    countriesYesterday: {},
   }),
   methods: {
     fetchData() {
@@ -62,8 +39,16 @@ export default {
         .get("https://corona.lmao.ninja/all")
         .then((response) => {
           this.countriesTotal = response.data;
-          //TODO: Add to vuex
-          // this.$store.dispatch("getCountriesTotal", this.countriesTotal);
+          this.$store.dispatch("countries/storeCountriesTotal", response.data);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+
+      this.axios
+        .get("https://corona.lmao.ninja/yesterday")
+        .then((response) => {
+          this.countriesYesterday = response.data;
         })
         .catch((error) => {
           console.log(error);

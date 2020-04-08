@@ -1,15 +1,12 @@
-import getters from "./getters";
-import mutations from "./mutations";
-import actions from "./actions";
+const files = require.context(".", true, /index.js$/);
+const modules = {};
 
-const state = {
-  countriesTotal: {},
-};
+files.keys().forEach((key) => {
+  if (key === "./index.js") {
+    return;
+  }
+  const moduleName = key.split("/")[1];
+  modules[moduleName] = files(key).default;
+});
 
-export default {
-  namespaced: true,
-  state,
-  getters,
-  mutations,
-  actions,
-};
+export default modules;
