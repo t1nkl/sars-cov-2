@@ -34,7 +34,7 @@
       </template>
 
       <template v-slot:item.cases="{ item }">
-        {{ parseFloat(item.cases).toLocaleString('ru') }}
+        {{ parseFloat(item.cases).toLocaleString("ru") }}
         <v-chip
           class="ma-2"
           color="red"
@@ -44,38 +44,43 @@
         >
           + {{ item.todayCases }}
         </v-chip>
+        <v-chip
+          class="ma-2"
+          color="red"
+          small
+          text-color="white"
+          v-else-if="getYesterdayByKey(item, 'todayCases') > 0"
+        >
+          + {{ getYesterdayByKey(item, "todayCases") }}
+        </v-chip>
         <v-chip class="ma-2" color="lime" small text-color="black" v-else>
           0
         </v-chip>
       </template>
 
       <template v-slot:item.recovered="{ item }">
-        {{ parseFloat(item.recovered).toLocaleString('ru') }}
+        {{ parseFloat(item.recovered).toLocaleString("ru") }}
         <v-chip
           class="ma-2"
           color="lime"
           small
           text-color="black"
-          v-if="
-            countriesYesterday &&
-              (item.todayRecovered =
-                item.recovered -
-                countriesYesterday.find(
-                  (element) => element.country == item.country
-                ).recovered) > 0
-          "
+          v-if="getTodayRecovered(item)"
         >
-          + {{ item.todayRecovered }}
+          + {{ getTodayRecovered(item) }}
         </v-chip>
         <v-chip class="ma-2" color="red" small text-color="white" v-else>
-          {{ item.todayRecovered }}
+          {{ getTodayRecovered(item) }}
         </v-chip>
       </template>
 
       <template v-slot:item.deaths="{ item }">
-        {{ parseFloat(item.deaths).toLocaleString('ru') }}
+        {{ parseFloat(item.deaths).toLocaleString("ru") }}
         <v-chip class="ma-2" small v-if="item.todayDeaths > 0">
           + {{ item.todayDeaths }}
+        </v-chip>
+        <v-chip class="ma-2" small v-else-if="item.todayDeaths === 0">
+          + {{ getYesterdayByKey(item, "todayDeaths") }}
         </v-chip>
         <v-chip class="ma-2" color="lime" small text-color="black" v-else>
           0
@@ -107,135 +112,165 @@
 </template>
 
 <script>
-  export default {
-    name: 'CountriesTable',
-    props: {
-      loading: {
-        type: Boolean,
-        required: true,
+export default {
+  name: "CountriesTable",
+  props: {
+    loading: {
+      type: Boolean,
+      required: true,
+    },
+    countries: {
+      type: Array,
+      required: true,
+    },
+    countriesYesterday: {
+      type: Array,
+      required: true,
+    },
+  },
+  data: () => ({
+    headers: [
+      {
+        text: "Country",
+        align: "center",
+        value: "country",
+        class: "text-center text-uppercase",
       },
-      countries: {
-        type: Array,
-        required: true,
+      {
+        text: "Cases",
+        align: "center",
+        value: "cases",
+        class: "text-center text-uppercase",
       },
-      countriesYesterday: {
-        type: Array,
-        required: true,
+      {
+        text: "Active",
+        align: "center",
+        value: "active",
+        class: "text-center text-uppercase",
+      },
+      {
+        text: "Recovered",
+        align: "center",
+        value: "recovered",
+        class: "text-center text-uppercase",
+      },
+      {
+        text: "Critical",
+        align: "center",
+        value: "critical",
+        class: "text-center text-uppercase",
+      },
+      {
+        text: "Deaths",
+        align: "center",
+        value: "deaths",
+        class: "text-center text-uppercase",
+      },
+      {
+        text: "Tests",
+        align: "center",
+        value: "tests",
+        class: "text-center text-uppercase",
+      },
+      {
+        text: "Cases/Million",
+        align: "center",
+        value: "casesPerOneMillion",
+        class: "text-center text-uppercase",
+      },
+      {
+        text: "Deaths/Million",
+        align: "center",
+        value: "deathsPerOneMillion",
+        class: "text-center text-uppercase",
+      },
+      // {
+      //   text: 'Tests/Million',
+      //   align: 'center',
+      //   value: 'testsPerOneMillion',
+      //   class: 'text-center text-uppercase',
+      // },
+    ],
+    loadingSparkline: false,
+    expandedCountry: {
+      country: "",
+      provinces: [],
+      timeline: {
+        cases: {},
+        deaths: {},
+        recovered: {},
       },
     },
-    data: () => ({
-      headers: [
-        {
-          text: 'Country',
-          align: 'center',
-          value: 'country',
-          class: 'text-center text-uppercase',
-        },
-        {
-          text: 'Cases',
-          align: 'center',
-          value: 'cases',
-          class: 'text-center text-uppercase',
-        },
-        {
-          text: 'Active',
-          align: 'center',
-          value: 'active',
-          class: 'text-center text-uppercase',
-        },
-        {
-          text: 'Recovered',
-          align: 'center',
-          value: 'recovered',
-          class: 'text-center text-uppercase',
-        },
-        {
-          text: 'Critical',
-          align: 'center',
-          value: 'critical',
-          class: 'text-center text-uppercase',
-        },
-        {
-          text: 'Deaths',
-          align: 'center',
-          value: 'deaths',
-          class: 'text-center text-uppercase',
-        },
-        {
-          text: 'Tests',
-          align: 'center',
-          value: 'tests',
-          class: 'text-center text-uppercase',
-        },
-        {
-          text: 'Cases/Million',
-          align: 'center',
-          value: 'casesPerOneMillion',
-          class: 'text-center text-uppercase',
-        },
-        {
-          text: 'Deaths/Million',
-          align: 'center',
-          value: 'deathsPerOneMillion',
-          class: 'text-center text-uppercase',
-        },
-        {
-          text: 'Tests/Million',
-          align: 'center',
-          value: 'testsPerOneMillion',
-          class: 'text-center text-uppercase',
-        },
-      ],
-      loadingSparkline: false,
-      expandedCountry: {
-        country: '',
-        provinces: [],
-        timeline: {
-          cases: {},
-          deaths: {},
-          recovered: {},
-        },
-      },
-    }),
-    methods: {
-      async toggleExpanded (event) {
-        if (this.expandedCountry.country === event.item.country) {
-          this.loadingSparkline = false
+  }),
+  methods: {
+    async toggleExpanded(event) {
+      if (this.expandedCountry.country === event.item.country) {
+        this.loadingSparkline = false;
 
-          return
+        return;
+      }
+
+      this.loadingSparkline = true;
+
+      await this.axios
+        .get(
+          "https://corona.lmao.ninja/v2/historical/" +
+            event.item.country +
+            "?lastdays=30"
+        )
+        .then((response) => {
+          this.expandedCountry = response.data;
+          this.loadingSparkline = false;
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    },
+    getTodayRecovered(item) {
+      if (this.countriesYesterday && this.countriesYesterday.length > 0) {
+        const yesterday = this.countriesYesterday.find(
+          (element) => element.country === item.country
+        );
+
+        if (yesterday && yesterday.recovered) {
+          return item.recovered - yesterday.recovered;
+        }
+      }
+
+      return 0;
+    },
+    getYesterdayByKey(item, key) {
+      if (this.countriesYesterday && this.countriesYesterday.length > 0) {
+        const yesterday = this.countriesYesterday.find(
+          (element) => element.country === item.country
+        );
+
+        if (yesterday && yesterday[key]) {
+          return yesterday[key] + item[key];
         }
 
-        this.loadingSparkline = true
+        return item[key];
+      }
 
-        await this.axios.get(
-          'https://corona.lmao.ninja/v2/historical/' +
-          event.item.country +
-          '?lastdays=30',
-        ).then((response) => {
-          this.expandedCountry = response.data
-          this.loadingSparkline = false
-        }).catch((error) => {
-          console.log(error)
-        })
-      },
+      return item[key];
     },
-    mounted: function () {
-      //
-    },
-    computed: {
-      timeline () {
-        const cases = Object.values(this.expandedCountry.timeline.cases)
-        const recovered = Object.values(
-          this.expandedCountry.timeline.recovered)
-        const result = []
+  },
+  computed: {
+    timeline() {
+      const cases = Object.values(this.expandedCountry.timeline.cases);
+      const recovered = Object.values(this.expandedCountry.timeline.recovered);
+      const result = [];
 
-        for (var i = 0; i <= cases.length - 1; i++)
-          result.push(cases[i] - recovered[i])
+      for (var i = 0; i <= cases.length - 1; i++)
+        result.push(cases[i] - recovered[i]);
 
-        return result
-      },
+      return result;
     },
-  }
+  },
+  mounted: function() {
+    //
+  },
+};
 </script>
 
 <style scoped></style>
