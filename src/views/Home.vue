@@ -36,41 +36,26 @@ export default {
     countriesYesterday: {},
   }),
   methods: {
-    async fetchData() {
+    fetchData() {
       this.loading = true;
 
-      await this.axios
-        .get("https://corona.lmao.ninja/all")
-        .then((response) => {
-          this.countriesTotal = response.data;
-          this.$store.dispatch("countries/storeCountriesTotal", response.data);
-        })
-        .catch((error) => {
-          console.log(error);
+      this.getTotalCountries((response) => {
+        this.countriesTotal = response;
+        this.$store.dispatch("countries/storeCountriesTotal", response);
+      });
+
+      this.getCountries((response) => {
+        var responseData = filter(response, function(data) {
+          return data && data.country && data.cases > 0;
         });
 
-      await this.axios
-        .get("https://corona.lmao.ninja/yesterday")
-        .then((response) => {
-          this.countriesYesterday = response.data;
-        })
-        .catch((error) => {
-          console.log(error);
-        });
+        this.countries = orderBy(responseData, ["cases"], ["desc"]);
+        this.loading = false;
+      });
 
-      await this.axios
-        .get("https://corona.lmao.ninja/countries")
-        .then((response) => {
-          var responseData = filter(response.data, function(data) {
-            return data && data.country && data.cases > 0;
-          });
-
-          this.countries = orderBy(responseData, ["cases"], ["desc"]);
-          this.loading = false;
-        })
-        .catch((error) => {
-          console.log(error);
-        });
+      this.getYesterdayCountries((response) => {
+        this.countriesYesterday = response;
+      });
     },
   },
   created: function() {

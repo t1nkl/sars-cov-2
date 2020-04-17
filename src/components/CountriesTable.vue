@@ -58,6 +58,7 @@
         </v-chip>
       </template>
 
+      <!-- Recovered -->
       <template v-slot:item.recovered="{ item }">
         {{ parseFloat(item.recovered).toLocaleString("ru") }}
         <v-chip
@@ -227,7 +228,7 @@ export default {
         });
     },
     getTodayRecovered(item) {
-      if (this.countriesYesterday && this.countriesYesterday.length > 0) {
+      if (this.countriesYesterday) {
         const yesterday = this.countriesYesterday.find(
           (element) => element.country === item.country
         );
